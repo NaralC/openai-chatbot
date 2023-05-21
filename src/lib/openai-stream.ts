@@ -29,7 +29,7 @@ export async function OpenAIStream(payload: OpenAIStreamPayload) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPEN_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify(payload),
   });
@@ -47,9 +47,9 @@ export async function OpenAIStream(payload: OpenAIStreamPayload) {
 
           try {
             const json = JSON.parse(data);
-            console.log(`json ${json}`);
+            console.log('json', json);
             const text = json.choices[0].delta?.content || "";
-            console.log(`text ${text}`)
+            console.log('text', text);
 
             // Check if text's a prefix char
             if (counter < 2 && (text.match(/\n/) || []).length == 0) {

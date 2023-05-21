@@ -1,5 +1,5 @@
-import Chat from "./components/chat";
-import Providers from "./components/providers";
+import Chat from "../components/chat";
+import Providers from "../components/providers";
 import "./globals.css";
 import { Inter } from "next/font/google";
 
