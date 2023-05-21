@@ -24,6 +24,7 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
         }),
       });
 
+      setInput("");
       return response.body;
     },
 
