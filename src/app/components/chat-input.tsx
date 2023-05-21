@@ -20,7 +20,7 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: 'henlo',
+          messages: [message],
         }),
       });
 
@@ -49,8 +49,8 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
               const message: Message = {
                 id: nanoid(),
                 isUserMessage: true,
-                text: input
-              }
+                text: input,
+              };
 
               sendMessage(message);
             }
