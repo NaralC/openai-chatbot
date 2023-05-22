@@ -1,5 +1,5 @@
 import Chat from "../components/chat";
-import Providers from "../components/providers";
+import { default as QueryClientProvider } from "../components/providers";
 import "./globals.css";
 import { Inter } from "next/font/google";
 
@@ -17,12 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Providers>
+      <QueryClientProvider>
         <body className={inter.className}>
           <Chat />
           {children}
         </body>
-      </Providers>
+      </QueryClientProvider>
     </html>
   );
 }
