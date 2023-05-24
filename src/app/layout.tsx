@@ -1,3 +1,4 @@
+import { Toaster } from "react-hot-toast";
 import Chat from "../components/chat";
 import { default as QueryClientProvider } from "../components/providers";
 import "./globals.css";
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <QueryClientProvider>
         <body className={inter.className}>
+          <Toaster/>
           <Chat />
           {children}
         </body>

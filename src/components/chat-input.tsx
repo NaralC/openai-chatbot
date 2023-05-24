@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils";
 import { Message } from "@/lib/validators/message";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { CornerDownLeft, Loader2 } from "lucide-react";
 import { nanoid } from "nanoid";
 import React, { FC, HTMLAttributes, useContext, useRef, useState } from "react";
+import { toast } from "react-hot-toast";
 import TextareaAutosize from "react-textarea-autosize";
 
 export const runtime = "edge"; // 'nodejs' (default) | 'edge'
@@ -64,9 +66,10 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
             "Content-Type": "application/json",
           },
         }
-      );
+      ).catch((error) => {
+        throw new Error('Something went wrong')
+      })
 
-      setInput("");
       return response.data;
     },
 
@@ -106,6 +109,13 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
 
     onMutate: (message) => {
       addMessage(message);
+      setInput("");
+    },
+
+    onError: (error, variables, context) => {
+      toast.error("Something went wrong");
+      removeMessage(variables.id)
+      textareaRef.current?.focus();
     }
   });
 
@@ -133,7 +143,23 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
             }
           }}
           placeholder={"Ask me something.."}
-          className="peer disabled:opacity-50 pr-14 resize-none block w-full border-0 bg-zinc-100 py-1.5 text-gray-900 focus:ring-0 text-sm sm:leading-6"
+          disabled={isLoading}
+          className="peer disabled:opacity-50 pr-14 resize-none block w-full border-0 bg-zinc-100 py-1.5 text-gray-900 focus:ring-0 text-sm sm:leading-6 focus:border-indigo-400 focus:border-b-2"
+        />
+
+        <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
+          <kbd className="inline-flex items-center px-1 font-sans text-xs text-gray-400 bg-white border border-gray-200 rounded">
+            {isLoading ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <CornerDownLeft className="w-3 h-3" />
+            )}
+          </kbd>
+        </div>
+
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 border-t border-gray-300"
         />
       </div>
     </div>
