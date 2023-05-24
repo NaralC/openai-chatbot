@@ -52,7 +52,7 @@ export async function OpenAIStream(payload: OpenAIStreamPayload) {
             console.log('text', text);
 
             // Check if text's a prefix char
-            if (counter < 2 && (text.match(/\n/) || []).length == 0) {
+            if (counter < 2 && (text.match(/\n/) || []).length) {
               return;
             }
 

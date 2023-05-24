@@ -44,33 +44,21 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
 
   const { mutate: sendMessage, isLoading } = useMutation({
     mutationFn: async (message: Message) => {
-      // const response = await fetch("/api/message", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     messages: [message],
-      //   }),
-      // });
-      // setInput("");
-      // return response.body;
-
-      const response = await axios.post(
-        "/api/message",
-        {
-          messages: [message],
+      const response = await fetch("/api/message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      ).catch((error) => {
-        throw new Error('Something went wrong')
-      })
+        body: JSON.stringify({
+          messages: [message],
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("API Route error")
+      }
 
-      return response.data;
+      return response.body;
     },
 
     onSuccess: async (stream) => {
