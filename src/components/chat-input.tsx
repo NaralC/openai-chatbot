@@ -1,39 +1,88 @@
 "use client";
 
+import { MessagesContext } from "@/context/messages";
+import { useMessagesStore } from "@/context/messages-zustand";
 import { cn } from "@/lib/utils";
 import { Message } from "@/lib/validators/message";
 import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import { nanoid } from "nanoid";
-import React, { FC, HTMLAttributes, useState } from "react";
+import React, { FC, HTMLAttributes, useContext, useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 
-export const runtime = 'edge'; // 'nodejs' (default) | 'edge'
+export const runtime = "edge"; // 'nodejs' (default) | 'edge'
 
 interface ChatInputProps extends HTMLAttributes<HTMLDivElement> {}
 
 const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
   const [input, setInput] = useState<string>("");
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // const {
+  //   messages,
+  //   addMessage,
+  //   removeMessage,
+  //   updateMessage,
+  //   setIsMessageUpdating
+  // } = useContext(MessagesContext);
+
+  const [
+    messages,
+    addMessage,
+    removeMessage,
+    updateMessage,
+    setIsMessageUpdating,
+  ] = useMessagesStore((state) => [
+    state.messages,
+    state.addMessage,
+    state.removeMessage,
+    state.updateMessage,
+    state.setIsMessageUpdating,
+  ]);
 
   const { mutate: sendMessage, isLoading } = useMutation({
     mutationFn: async (message: Message) => {
-      const response = await fetch("/api/message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      // const response = await fetch("/api/message", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     messages: [message],
+      //   }),
+      // });
+      // setInput("");
+      // return response.body;
+
+      const response = await axios.post(
+        "/api/message",
+        {
           messages: [message],
-        }),
-      });
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       setInput("");
-      return response.body;
+      return response.data;
     },
 
     onSuccess: async (stream) => {
       if (!stream) {
-        throw new Error('No stream found');
+        throw new Error("No stream found");
       }
+
+      const id = nanoid();
+      const responseMessage: Message = {
+        id,
+        isUserMessage: false,
+        text: "",
+      };
+      addMessage(responseMessage);
+      setIsMessageUpdating(true);
 
       const reader = stream.getReader();
       const decoder = new TextDecoder();
@@ -44,14 +93,27 @@ const ChatInput: FC<ChatInputProps> = ({ className, ...props }) => {
         done = doneReading;
         const chunkValue = decoder.decode(value);
         console.log(chunkValue);
+
+        updateMessage(id, (prev) => prev + chunkValue);
       }
+
+      // Clean up and re-focus the textarea
+      setIsMessageUpdating(false);
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 10);
     },
+
+    onMutate: (message) => {
+      addMessage(message);
+    }
   });
 
   return (
     <div {...props} className={cn("border-t border-zinc-300 px-3", className)}>
       <div className="relative flex-1 mt-4 overflow-hidden border-none rounded-lg outline-none">
         <TextareaAutosize
+          ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={2}
